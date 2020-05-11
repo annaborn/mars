@@ -26,12 +26,21 @@ pkg_check_modules(PKGCONFIG REQUIRED
 			    main_gui
 			    cfg_manager
 			    mars_interfaces
-			    opencv
           configmaps
 )
 
+if(DEFINED ENV{EXTERNAL_OPENCV_PATH})
+    message("EXTERNAL_OPENCV_PATH is set, searching in location: $ENV{EXTERNAL_OPENCV_PATH}")
+    find_package(OpenCV REQUIRED PATHS $ENV{EXTERNAL_OPENCV_PATH} NO_CMAKE_SYSTEM_PATH)
+else()
+    message("OPENCV_INSTALL_DIR not set, searching in default location(s)")
+    find_package(OpenCV REQUIRED NO_CMAKE_ENVIRONMENT_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_PATH)
+endif(DEFINED ENV{EXTERNAL_OPENCV_PATH})
+
 include_directories(${PKGCONFIG_INCLUDE_DIRS})
+include_directories("${OpenCV_INCLUDE_DIRS}")
 link_directories(${PKGCONFIG_LIBRARY_DIRS})
+link_directories(${OpenCV_LIBRARY_DIRS})
 add_definitions(${PKGCONFIG_CFLAGS_OTHER})  #not the ones starting with -I
 
 find_package(OpenSceneGraph REQUIRED osgManipulator osgViewer osgFX osgShadow osgParticle osgTerrain osgDB osgGA osgText osgUtil)
@@ -194,6 +203,7 @@ ELSE(APPLE)
                         ${PKGCONFIG_LIBRARIES} ${PKGCONFIG_LDFLAGS_OTHER}
                         ${WIN_LIBS}
                         ${OPENSCENEGRAPH_LIBRARIES}
+                        ${OpenCV_LIBRARIES}
   )
 ENDIF(APPLE)
 
