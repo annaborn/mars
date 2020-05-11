@@ -27,10 +27,20 @@ pkg_check_modules(PKGCONFIG REQUIRED
 			    mars_utils
           mars_interfaces
           cfg_manager
-          opencv
 )
+
+if(DEFINED ENV{EXTERNAL_OPENCV_PATH})
+    message("EXTERNAL_OPENCV_PATH is set, searching in location: $ENV{EXTERNAL_OPENCV_PATH}")
+    find_package(OpenCV REQUIRED PATHS $ENV{EXTERNAL_OPENCV_PATH} NO_CMAKE_SYSTEM_PATH)
+else()
+    message("OPENCV_INSTALL_DIR not set, searching in default location(s)")
+    find_package(OpenCV REQUIRED NO_CMAKE_ENVIRONMENT_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_PATH)
+endif(DEFINED ENV{EXTERNAL_OPENCV_PATH})
+
 include_directories(${PKGCONFIG_INCLUDE_DIRS})
+include_directories("${OpenCV_INCLUDE_DIRS}")
 link_directories(${PKGCONFIG_LIBRARY_DIRS})
+link_directories(${OpenCV_LIBRARY_DIRS})
 add_definitions(${PKGCONFIG_CFLAGS_OTHER})  #cflags without -I
 
 
@@ -70,6 +80,7 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
                       ${OPENSCENEGRAPH_LIBRARIES}
                       ${PKGCONFIG_LIBRARIES}
+					  ${OpenCV_LIBRARIES}
 )
 
 if(WIN32)
